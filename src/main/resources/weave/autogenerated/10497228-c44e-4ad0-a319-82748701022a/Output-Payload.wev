@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_10497228_c44e_4ad0_a319_82748701022a_Output_Payload = {|
+  firstName: String, 
+  lastName: String, 
+  address: String, 
+  orderId: String
+|}
+

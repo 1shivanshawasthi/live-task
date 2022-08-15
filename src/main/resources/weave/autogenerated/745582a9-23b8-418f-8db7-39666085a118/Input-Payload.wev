@@ -1,0 +1,11 @@
+%dw 2.0
+
+type auto_745582a9_23b8_418f_8db7_39666085a118_Input_Payload = {
+  quantity: Number, 
+  size: String, 
+  orderId: String, 
+  id: String, 
+  category: String, 
+  _?: Any
+}
+

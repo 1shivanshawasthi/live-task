@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_c28a6f56_e285_41b2_b4ac_027271c7bf66_Output_Payload = {|
+  id: String, 
+  category: String, 
+  quantity: Number, 
+  size: String, 
+  orderId: String
+|}
+

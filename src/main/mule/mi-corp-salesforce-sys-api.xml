@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="mi-corp-salesforce-sys-api-config" api="resource::ce235d46-115c-497c-b0e2-474afd80f5e9:mi-corp-salesforce-sys-api:1.0.1:raml:zip:mi-corp-salesforce-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="mi-corp-salesforce-sys-api-main">
+        <http:listener config-ref="mi-corp-salesforce-sys-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="mi-corp-salesforce-sys-api-config" />
+        <error-handler ref="errorhandler">
+           </error-handler>
+    </flow>
+    <flow name="mi-corp-salesforce-sys-api-console">
+        <http:listener config-ref="mi-corp-salesforce-sys-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="mi-corp-salesforce-sys-api-config" />
+		<error-handler ref="errorhandler" />
+    </flow>
+    <flow name="get:\order:mi-corp-salesforce-sys-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  poNumber: "123461",
+  signatureRequiredFlag: false,
+  shipInstructions: "Don't break it",
+  giftWrapFlag: true,
+  giftWrapMessage: "You rock!",
+  currencyCode: "USD",
+  subTotal: 41.5,
+  email: "test@test.com"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\item\(itemId):mi-corp-salesforce-sys-api-config">
+        <flow-ref doc:name="Flow Reference" doc:id="dee317ba-f446-487f-83aa-138895b443c2" name="get-item-itemid:"/>
+		<ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="itemId">attributes.uriParams.'itemId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: "34567",
+  category: "Hoodie",
+  quantity: 3,
+  size: "M",
+  orderId: "a003k00000TudZ7AAJ"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\customer\(orderId):mi-corp-salesforce-sys-api-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a5b949af-199a-4c78-8a69-0f73aa541ac4" name="get-customer-orderid:"/>
+    </flow>
+    <flow name="get:\order\(poNumber):mi-corp-salesforce-sys-api-config">
+        <flow-ref doc:name="Flow Reference" doc:id="e0be5fe1-27b7-4a92-bfa8-3a5dfecad47b" name="get-order-po:"/>
+    </flow>
+    <flow name="post:\customer:application\json:mi-corp-salesforce-sys-api-config">
+        <flow-ref doc:name="Flow Reference" doc:id="45d09dbc-759a-4df7-a884-6efe9e1c973b" name="create-customer-flow:"/>
+    </flow>
+    <flow name="post:\item:application\json:mi-corp-salesforce-sys-api-config">
+        <flow-ref doc:name="Flow Reference" doc:id="ca36dd79-3987-4d57-8cd7-a980a1ef3f0b" name="create-item-flow:"/>
+    </flow>
+    <flow name="post:\order:application\json:mi-corp-salesforce-sys-api-config">
+        <flow-ref doc:name="Flow Reference" doc:id="89528250-be32-461d-9764-6b4fba270aa5" name="create-order-flow:"/>
+    </flow>
+</mule>

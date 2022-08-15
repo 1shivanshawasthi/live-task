@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="mi-corp-salesforce-sys-api-httpListenerConfig">
+        <http:listener-connection host="${http.host}" port="${http.port}" />
+    </http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce_Config" doc:id="9da61674-5ce5-4692-b2c2-f6a63cd86297" >
+		<salesforce:basic-connection username="shivanshawasthi@caelius.consulting" password="${secure::Relations.Password}" securityToken="${secure::Relations.Token}" />
+	</salesforce:sfdc-config>
+	<configuration doc:name="Configuration" doc:id="a559f429-75ef-4545-aed5-0a9a39f5d0b8" defaultErrorHandler-ref="errorhandler" />
+	<configuration-properties doc:name="Configuration properties" doc:id="fdc8086f-519f-4657-8ab1-6270f733228f" file="configuration.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="6dd66b9a-d3be-4e84-a594-2d3a3a649936" file="configuration_secure.yaml" key="abcdefghijklmnop" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<api-gateway:autodiscovery apiId="${secure::Autodiscovery.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="aa476a69-4d42-4ffd-a5df-e70f515e0c15" flowRef="mi-corp-salesforce-sys-api-main" />
+</mule>

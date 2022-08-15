@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="create-order-flow:" doc:id="4e0a169d-4665-432f-9e6d-c5e4930c7b12" >
+		<logger level="INFO" doc:name="Start flow for CreateOrder" doc:id="7701293c-8ee4-4241-932f-ff19e4e1763d" message="Start flow for CreateOrder"/>
+		<ee:transform doc:name="Request Payload" doc:id="c111ed6b-c8e5-4f07-8f41-c8d4305b41ee" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	currencyCode__c: payload.currencyCode,
+	email__c: payload.email,
+	shipInstructions__c: payload.shipInstructions,
+	giftWrap__c: payload.giftWrapFlag,
+	giftWrapMessage__c: payload.giftWrapMessage,
+	poNumber__c: payload.poNumber as Number,
+	subTotal__c: payload.subTotal,
+	signatureRequiredFlag__c: payload.signatureRequiredFlag
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Create" doc:id="39160edf-2d57-4ce8-b245-29253a0273e9" config-ref="Salesforce_Config" type="Orderr__c">
+		</salesforce:create>
+		<ee:transform doc:name="Reponse Payload" doc:id="762c4d1b-9d85-43cb-8345-3ddb8cc221c3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End flow for CreateOrder" doc:id="67f0e639-8820-4eed-ae30-1d3f73555a75" message="End flow for CreateOrder"/>
+	</flow>
+	<flow name="create-customer-flow:" doc:id="9288d0e2-d338-402b-9282-5474ea5d3a13" >
+		<logger level="INFO" doc:name="Start flow for CreateCustomer" doc:id="b03eedd6-a2ec-432d-8375-baa55523e402" message="Start flow for CreateCustomer"/>
+		<ee:transform doc:name="Request Payload" doc:id="800fa506-b54e-4f4d-85af-c606d55dc377" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	firstName__c:payload.firstName,
+	lastName__c:payload.lastName,
+	address__c:payload.address,
+	Orderr__c:payload.orderId
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Customer__c" doc:name="Create" doc:id="1c6fb737-38a2-48aa-9406-e75fe5dbec50" config-ref="Salesforce_Config">
+		</salesforce:create>
+		<ee:transform doc:name="ResponsePayload" doc:id="6c6b9d14-62d2-4996-b1fe-a0aead058644" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Start flow for CreateCustomer" doc:id="df792b55-bb3f-4a36-87bb-3ba6ad86377f" message="Start flow for CreateCustomer"/>
+	</flow>
+	<flow name="create-item-flow:" doc:id="745582a9-23b8-418f-8db7-39666085a118" >
+		<logger level="INFO" doc:name="Start flow for CreateItem" doc:id="0c2b1278-d496-457c-93b7-0d379f422fea" message="Start flow for CreateItem"/>
+		<ee:transform doc:name="Request Payload" doc:id="66a404d0-0b8e-43d4-a3cd-4c0421b67b9c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	quantity__c:payload.quantity,
+	size__c:payload.size,
+	Orderr__c:payload.orderId,
+	id__c:payload.id,
+	category__c:payload.category
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="item__c" doc:name="Create" doc:id="211dc3e2-b2cd-42a9-8e9f-963c5d45b302" config-ref="Salesforce_Config">
+		</salesforce:create>
+		<ee:transform doc:name="Response Payload" doc:id="90cb7017-3d4a-45ce-93e5-1f90e55451bf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End flow for CreateItem" doc:id="1f4c7b02-d84a-4af9-a1c4-8cd494e530d5" message="End flow for CreateItem"/>
+	</flow>
+	<flow name="get-order-po:" doc:id="b5079cd5-7701-407e-b5ce-c593bc2e0128" >
+		<logger level="INFO" doc:name="Start flow for get order" doc:id="7b3b6a0e-493e-4187-8fc5-9284ad267167" />
+		<set-variable value="#[attributes.uriParams.'poNumber']" doc:name="poNumber" doc:id="4af51926-5123-48ad-bfa4-d3c935e629d2" variableName="poNumber" />
+		<ee:transform doc:name="Request Payload" doc:id="646c7be0-238b-4c73-bb28-d317731d9000" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"SELECT FIELDS(ALL) FROM Orderr__c where poNumber__c=" ++ vars.poNumber ++ " LIMIT 200"
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:query doc:name="Query" doc:id="82e1e9ed-0705-46de-97a7-8a44e2770caa" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[#[payload]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Response Payload" doc:id="3b9dffc9-85f4-42fe-8331-4379f2d15a9c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End flow for get order" doc:id="2cd37b26-d7bf-4eda-835a-2a9557ce929c" message="endflow for get order"/>
+	</flow>
+	<flow name="get-customer-orderid:" doc:id="10497228-c44e-4ad0-a319-82748701022a" >
+		<logger level="INFO" doc:name="Start flow for get customer" doc:id="bf6fbb63-af1b-4595-ab1a-67ae00e9d6d7" />
+		<set-variable value="#[attributes.uriParams.'orderId']" doc:name="orderId" doc:id="4012b299-9ed3-46c4-b9b8-530032f79214" variableName="OrderId"/>
+		<ee:transform doc:name="Request Payload" doc:id="a1505b59-416b-40f4-bccb-25cbeaec3453">
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"SELECT FIELDS(ALL) FROM Customer__c where Orderr__c='" ++ vars.orderId ++ "' LIMIT 200"]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query" doc:id="e29f86dc-1934-492a-be61-17a029061528" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[#[payload]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Response Payload" doc:id="0cdd9664-dc85-4593-9089-23569f830fc3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End flow for get customer" doc:id="412548ae-97f9-424e-a925-6263921a0c3c" message="end flow for get customer"/>
+	</flow>
+	<flow name="get-item-itemid:" doc:id="c28a6f56-e285-41b2-b4ac-027271c7bf66" >
+		<logger level="INFO" doc:name="Start flow for get item" doc:id="6978b046-335c-42e5-bea6-cfc1927156ff" message="Start flow for get item"/>
+		<set-variable doc:name="ItemId" doc:id="75e5ac1a-2fb6-46a3-b8ea-8fa645910da6" variableName="ItemId" value="#[attributes.uriParams.'itemId']"/>
+		<ee:transform doc:name="Request Payload" doc:id="38034d6c-56c4-474b-9a3e-3a4099586867" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"SELECT FIELDS(ALL) FROM item__c where id__c='" ++ vars.ItemId ++ "' LIMIT 200"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:query doc:name="Query" doc:id="3c6bdb3a-9efd-4e51-946e-06aea31c9383" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[#[payload]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Response Payload" doc:id="ce12021b-485f-4037-8230-a1efade93662" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: "34567",
+  category: "Hoodie",
+  quantity: 3,
+  size: "M",
+  orderId: "a003k00000TudZ7AAJ"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End flow for get item" doc:id="1d015fa3-da1e-4bb5-ad80-4b75f8df8a5a" message="End flow for get item"/>
+	</flow>
+</mule>

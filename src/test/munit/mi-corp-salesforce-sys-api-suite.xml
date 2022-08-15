@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="mi-corp-salesforce-sys-api-suite.xml" />
+	<munit:test name="mi-corp-salesforce-sys-api-main-test" doc:id="4b4e7cf7-3a6e-4ec3-94f8-faf73d27a882" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="6014154c-06e2-4d02-9c44-51df7815e304" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://micorpsalesforcesysapimaintest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://micorpsalesforcesysapimaintest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to mi-corp-salesforce-sys-api-main" doc:id="032bf6d7-919e-476a-9957-9fb4b005d29f" name="mi-corp-salesforce-sys-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="33125b12-11c5-46cb-b4a8-f0e22ce04f20" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import micorpsalesforcesysapimaintest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
